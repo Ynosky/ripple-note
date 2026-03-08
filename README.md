@@ -1,6 +1,6 @@
 # ripple-note — Focus Writer
 
-A minimalist, distraction-free Markdown editor inspired by [iA Writer](https://ia.net/writer), built with Vite, TypeScript, and React.
+A minimalist, distraction-free Markdown editor built with Vite, TypeScript, and React.
 
 ## Overview
 
