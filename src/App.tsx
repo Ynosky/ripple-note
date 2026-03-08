@@ -57,7 +57,7 @@ interface Document {
 
 const DEFAULT_SETTINGS: AppSettings = {
   theme: 'light',
-  typography: 'mono', // iA Writer defaults to a custom mono/duospace font
+  typography: 'mono',
   focusMode: false,
   typewriterMode: false,
   viewMode: 'edit',
@@ -73,7 +73,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 const DEFAULT_TEXT = `# Welcome to Focus Writer
 
-Focus Writer is a minimalist, distraction-free writing environment inspired by iA Writer.
+Focus Writer is a minimalist, distraction-free writing environment.
 
 ## Features
 
