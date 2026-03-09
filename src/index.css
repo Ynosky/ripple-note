@@ -47,7 +47,7 @@
 }
 
 .author-ai {
-  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  background: linear-gradient(90deg, #FFEB99 0%, #FF9999 50%, #9999FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

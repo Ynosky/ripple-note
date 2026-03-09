@@ -17,7 +17,8 @@ import {
   Folder,
   Plus,
   Trash2,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -57,7 +58,7 @@ interface Document {
 
 const DEFAULT_SETTINGS: AppSettings = {
   theme: 'light',
-  typography: 'mono',
+  typography: 'mono', // iA Writer defaults to a custom mono/duospace font
   focusMode: false,
   typewriterMode: false,
   viewMode: 'edit',
@@ -73,7 +74,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 const DEFAULT_TEXT = `# Welcome to Focus Writer
 
-Focus Writer is a minimalist, distraction-free writing environment.
+Focus Writer is a minimalist, distraction-free writing environment inspired by iA Writer.
 
 ## Features
 
@@ -117,6 +118,7 @@ export default function App() {
   const [stats, setStats] = useState({ words: 0, chars: 0, readingTime: 0 });
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const editorRef = useRef<any>(null);
 
   // --- Effects ---
 
@@ -235,6 +237,27 @@ export default function App() {
   }, [isMenuOpen]);
 
   // --- Handlers ---
+
+  const handlePasteAsAI = async () => {
+    try {
+      const clipText = await navigator.clipboard.readText();
+      if (!clipText) return;
+      
+      const view = editorRef.current?.view;
+      if (view) {
+        const from = view.state.selection.main.from;
+        const to = view.state.selection.main.to;
+        view.dispatch({
+          changes: { from, to, insert: clipText },
+          effects: addAuthorMark.of({ from, to: from + clipText.length, authorId: 'ai' })
+        });
+        view.focus();
+      }
+    } catch (err) {
+      console.error("Failed to read clipboard", err);
+      alert("Could not access clipboard. Please ensure you have granted clipboard permissions.");
+    }
+  };
 
   const handleEditorChange = useCallback((val: string, viewUpdate: any) => {
     setText(val);
@@ -381,6 +404,7 @@ export default function App() {
     return (
       <div className={`w-full h-full flex flex-col ${settings.focusMode ? 'focus-mode' : ''} ${settings.typewriterMode ? 'typewriter-mode' : ''} ${getFontClass()}`}>
         <CodeMirror
+          ref={editorRef}
           key={activeDocId}
           value={text}
           theme={settings.theme === 'dark' ? 'dark' : 'light'}
@@ -491,6 +515,14 @@ export default function App() {
         </div>
 
         <div className="flex items-center space-x-1">
+          <button 
+            onClick={handlePasteAsAI}
+            className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            title="Paste as AI"
+          >
+            <Sparkles size={18} />
+          </button>
+          <div className="w-px h-6 bg-black/10 dark:bg-white/10 mx-1"></div>
           <button 
             onClick={() => setSetting('viewMode', 'edit')}
             className={`p-2 rounded-md transition-colors ${settings.viewMode === 'edit' ? 'bg-black/10 dark:bg-white/20' : 'hover:bg-black/5 dark:hover:bg-white/10'}`}
@@ -653,9 +685,10 @@ export default function App() {
                 {/* Authorship */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-semibold uppercase tracking-wider opacity-50">Current Author</h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                     {[
                       { id: 'me', label: 'Me', color: 'currentColor' },
+                      { id: 'ai', label: 'AI', color: 'transparent', isGradient: true },
                       { id: 'user1', label: 'U1', color: settings.authorColors?.user1 || '#EAB308' },
                       { id: 'user2', label: 'U2', color: settings.authorColors?.user2 || '#3B82F6' },
                       { id: 'user3', label: 'U3', color: settings.authorColors?.user3 || '#EC4899' }
@@ -670,10 +703,10 @@ export default function App() {
                           }`}
                           title={`Write as ${author.label}`}
                         >
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: author.color }}></span>
+                          <span className={`w-2 h-2 rounded-full ${author.isGradient ? 'bg-gradient-to-r from-[#FFEB99] via-[#FF9999] to-[#9999FF]' : ''}`} style={!author.isGradient ? { backgroundColor: author.color } : {}}></span>
                           <span>{author.label}</span>
                         </button>
-                        {author.id !== 'me' && (
+                        {author.id !== 'me' && author.id !== 'ai' && (
                           <input 
                             type="color" 
                             value={author.color}
@@ -694,7 +727,7 @@ export default function App() {
                     ))}
                   </div>
                   <p className="text-[10px] opacity-50 leading-tight">
-                    Use <kbd className="px-1 py-0.5 bg-black/10 dark:bg-white/10 rounded">Ctrl+Shift+V</kbd> to paste text as AI (gradient).
+                    Use <kbd className="px-1 py-0.5 bg-black/10 dark:bg-white/10 rounded">Ctrl+Shift+V</kbd> or the <Sparkles size={10} className="inline" /> button to paste text as AI.
                   </p>
                 </div>
 

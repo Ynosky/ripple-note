@@ -1,5 +1,5 @@
 {
   "name": "Focus Writer",
-  "description": "A minimalist, distraction-free Markdown editor.",
-  "requestFramePermissions": []
+  "description": "A minimalist, distraction-free Markdown editor inspired by iA Writer.",
+  "requestFramePermissions": ["clipboard-read", "clipboard-write"]
 }

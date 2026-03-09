@@ -21,10 +21,22 @@ export const authorshipField = StateField.define<DecorationSet>({
     // Process explicit effects (e.g., from custom paste)
     for (let e of tr.effects) {
       if (e.is(addAuthorMark)) {
-        const deco = Decoration.mark({ class: `author-${e.value.authorId}` });
-        decorations = decorations.update({
-          add: [deco.range(e.value.from, e.value.to)]
-        });
+        if (e.value.authorId === 'ai') {
+          // AI テキストに対して虹色グラデーションクラスを適用
+          // 指定範囲全体に対して 'author-ai' クラスを1つの Decoration として適用
+          const deco = Decoration.mark({ 
+            class: 'author-ai'
+          });
+          decorations = decorations.update({
+            add: [deco.range(e.value.from, e.value.to)]
+          });
+        } else {
+          // 他の author（user1, user2 など）は従来通り
+          const deco = Decoration.mark({ class: `author-${e.value.authorId}` });
+          decorations = decorations.update({
+            add: [deco.range(e.value.from, e.value.to)]
+          });
+        }
       }
     }
     
@@ -37,8 +49,13 @@ export const authorshipField = StateField.define<DecorationSet>({
       
       tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
         if (fromB < toB) {
-          const deco = Decoration.mark({ class: `author-${currentAuthor}` });
-          newDecos.push(deco.range(fromB, toB));
+          if (currentAuthor === 'ai') {
+            const deco = Decoration.mark({ class: 'author-ai' });
+            newDecos.push(deco.range(fromB, toB));
+          } else {
+            const deco = Decoration.mark({ class: `author-${currentAuthor}` });
+            newDecos.push(deco.range(fromB, toB));
+          }
         }
       });
       
